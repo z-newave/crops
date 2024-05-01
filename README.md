@@ -9,13 +9,13 @@ a PR.
 
 ## Syntax
 Crop data and its syntax are stored by default in `stardew_crops`. 
-Comments begin with `#` and are ignored by `crops`.
+Comments begin with `#` by default and are ignored by `crops`.
 
 ## Arguments
 ### Value options (minimum one):
- * `-p`  profit for a crop
- * `-P`  profit for a crop over a plot
- * `-s`  profit for a crop throughout the season
+ * `-p`  profit for an individual crop
+ * `-P`  profit for a crop over an entire plot
+ * `-s`  profit for an individual crop throughout the season
  * `-S`  profit for a crop throughout the season, over a plot
  * `-t`  days per harvest
 
@@ -31,3 +31,5 @@ Spring, Winter or All will be skipped.
 
 ## Requirements
 Requires GNU awk and its `getopt()` library function.
+ * `crops` looks for `getopt()` by default in `/usr/share/awk`; edit the
+   path at the top of `crops.awk` to specify another location.
