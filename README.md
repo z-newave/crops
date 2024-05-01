@@ -26,8 +26,9 @@ Comments begin with `#` by default and are ignored by `crops`.
    all seasons.
  * If no season is specified, print all complete crop records.
 
-**NOTE**: Any crop with a season value outside of Summer, Autumn,
-Spring, Winter or All will be skipped.
+**NOTE**: Any crop with a season value outside of `Summer`, `Autumn`,
+`Spring`, `Winter` or `All` will be skipped. `N/A` signifies a crop
+with an unknown growing season.
 
 ## Requirements
 Requires GNU awk and its `getopt()` library function.
