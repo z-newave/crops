@@ -17,6 +17,10 @@ Comments begin with `#` by default and are ignored by `crops`.
  * `-P`  profit for a crop over an entire plot
  * `-s`  profit for an individual crop throughout the season
  * `-S`  profit for a crop throughout the season, over a plot
+ * `-w`  average profit for a crop over a week (assuming planted at start of 
+         week)
+ * `-W`  average profit for a crop over a week (assuming planted at start of 
+         week), over a plot
  * `-t`  days per harvest
 
 ### Season options:

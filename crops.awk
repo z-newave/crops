@@ -7,7 +7,9 @@
 #  -P  profit for a crop over a plot
 #  -s  profit for a crop throughout the season
 #  -S  profit for a crop throughout the season, over a plot
-#  -t  days per harvest"
+#  -t  days per harvest
+#  -w  average (rounded down) profit for a crop in a week
+#  -W  average (rounded down) profit for a crop in a week, over a plot
 #
 # Season options:
 #  - Typing two hyphens followed by the season name (e.g. `--winter`)
@@ -47,6 +49,8 @@ BEGIN {
     A_SEASON_BIT        = 128
     A_SEASON_PLOT_BIT   = 256
     A_TPH_BIT           = 512
+    A_WEEK_BIT          = 1024
+    A_WEEK_PLOT_BIT     = 2048
 
     prefs_bit = parse_args()
 
@@ -95,7 +99,7 @@ function parse_args(        prefs_bit, Opterr) {
 
     # Process arguments and bitpack them into prefs_bit
     while ((c = getopt(ARGC, ARGV, 
-            "psPSht", 
+            "psPShtwW", 
             "summer,autumn,winter,spring,all")) != -1) {
         switch (c) {
             case "p":
@@ -115,6 +119,12 @@ function parse_args(        prefs_bit, Opterr) {
                 exit 0
             case "t":
                 prefs_bit = prefs_bit + A_TPH_BIT
+                break
+            case "w":
+                prefs_bit = prefs_bit + A_WEEK_BIT
+                break
+            case "W":
+                prefs_bit = prefs_bit + A_WEEK_PLOT_BIT
                 break
             case "summer":
                 prefs_bit = prefs_bit + S_SUMMER_BIT
@@ -165,9 +175,18 @@ function output_values(prefs_bit, cname, basep, sellp, tph, season) {
         printf "Season - plot:\t£ %6i\n", 
             profit_season(sellp, basep, tph) * PLOT_SIZE
 
+    if (and(prefs_bit, A_WEEK_BIT))            # w (mean profit within a week)
+        printf "Week:\t\t£ %6i\n",
+            profit_week(sellp, basep, tph)
+
+    if (and(prefs_bit, A_WEEK_BIT))            # W (mean profit within a week
+        printf "Week - plot:\t£ %6i\n",        #    over an entire plot)
+            profit_week(sellp, basep, tph) * PLOT_SIZE
+ 
     if (and(prefs_bit, A_TPH_BIT))             # t (days per harvest)
         printf "Harvest time:\t%i days\n", tph
 
+         
     # Must include two quotations - otherwise will print $0 by default
     print ""
 
@@ -191,6 +210,8 @@ function help() {
     print " -s  profit for a crop throughout the season"
     print " -S  profit for a crop throughout the season, over a plot"
     print " -t  days per harvest"
+    print " -w  average (rounded) profit for a crop in a week"
+    print " -W  average (rounded) profit for a crop in a week, over a plot"
     print 
     print "Season options:" 
     print " - Typing two hyphens followed by the season name (e.g. `--winter`)"
@@ -208,12 +229,12 @@ function help() {
 
 # Calculate number of harvests in a season
 function in_season(tph) {
-    return 28 / tph
+    return int(28 / tph)
 }
 
 # Calculate number of harvests in a week
 function in_week(tph) {
-    return 7 / tph
+    return int(7 / tph)
 }
 
 # Calculate raw profit for one crop without replanting
@@ -224,5 +245,10 @@ function profit(sellp, basep) {
 # Calculate profit for one crop over the season, if replanted
 function profit_season(sellp, basep, tph) {
     return in_season(tph) * profit(sellp, basep)
+}
+
+# Calculate average profit for one crop over a week without replanting
+function profit_week(sellp, basep, tph) {
+    return in_week(tph) * profit(sellp, basep)
 }
 
