@@ -1,2 +1,2 @@
 #!/bin/bash
-cat stardew_crops | gawk -p -f crops.awk -- "$@"
+cat stardew_crops | gawk -f crops.awk -- "$@"
