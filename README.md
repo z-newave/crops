@@ -31,6 +31,6 @@ Comments begin with `#` by default and are ignored by `crops`.
 with an unknown growing season.
 
 ## Requirements
-Requires GNU awk and its `getopt()` library function.
+Requires `gawk` and its `getopt()` library function, as well as `bash`
  * `crops` looks for `getopt()` by default in `/usr/share/awk`; edit the
    path at the top of `crops.awk` to specify another location.
