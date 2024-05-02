@@ -29,7 +29,7 @@
 # This file is part of `crops` which is released under the GPLv3 licence.
 # See file LICENSE for full licence details.
 
-@include "/usr/share/awk/getopt.awk"
+@include "getopt.awk"
 
 BEGIN {
     # Regular expression which marks commented-out lines to not be processed

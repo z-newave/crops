@@ -1,2 +1,10 @@
 #!/bin/bash
-cat stardew_crops | gawk -f crops.awk -- "$@"
+
+# Setting the path used to look for `getopt.awk` dependent on OS
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    export AWKPATH="/usr/share/awk"
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    export AWKPATH="/opt/homebrew/opt/gawk/share/awk"
+fi
+
+cat stardew_crops | gawk -f ./crops.awk -- "$@"
