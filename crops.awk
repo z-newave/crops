@@ -40,7 +40,7 @@ BEGIN {
     # Minimum number of fields in each record
     MIMUMUM_NR = 5
 
-    # Bitpacked command-line arguments - 10-bit integer.
+    # Bitpacked command-line arguments - 13-bit integer.
     # The right-most 5 bits represent requested seasons, while the rest
     # represent values to be calculated.
     prefs_bit = 0
