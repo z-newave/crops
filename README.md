@@ -22,6 +22,7 @@ Comments begin with `#` by default and are ignored by `crops`.
  * `-W`  average profit for a crop over a week (assuming planted at start of 
          week), over a plot
  * `-t`  days per harvest
+ * `-z`  specifies a custom plot size (in tiles)
 
 ### Season options:
  * Typing two hyphens followed by the season name (e.g. `--winter`)

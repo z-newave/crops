@@ -10,6 +10,7 @@
 #  -t  days per harvest
 #  -w  average (rounded down) profit for a crop in a week
 #  -W  average (rounded down) profit for a crop in a week, over a plot
+#  -z  specifies a custom plot size (in tiles)
 #
 # Season options:
 #  - Typing two hyphens followed by the season name (e.g. `--winter`)
@@ -30,8 +31,11 @@
 BEGIN {
     # Regular expression which marks commented-out lines to not be processed
     COMMENT_REGEXP = "^#"
-    # Number of crops in each plot
+    # Number of crops in each plot. This can be specified at runtime with the
+    # `-z` flag
     PLOT_SIZE = 72  
+    # Minimum number of fields in each record
+    MIMUMUM_NR = 5
 
     # Bitpacked command-line arguments - 10-bit integer.
     # The right-most 5 bits represent requested seasons, while the rest
@@ -99,7 +103,7 @@ function parse_args(        prefs_bit, Opterr) {
 
     # Process arguments and bitpack them into prefs_bit
     while ((c = getopt(ARGC, ARGV, 
-            "psPShtwW", 
+            "psPShtwWz:", 
             "summer,autumn,winter,spring,all")) != -1) {
         switch (c) {
             case "p":
@@ -125,6 +129,13 @@ function parse_args(        prefs_bit, Opterr) {
                 break
             case "W":
                 prefs_bit = prefs_bit + A_WEEK_PLOT_BIT
+                break
+            case "z":
+                if (Optarg == 0) {
+                    error("Plot size must be at least one")
+                    exit 1
+                }
+                PLOT_SIZE = int(Optarg)
                 break
             case "summer":
                 prefs_bit = prefs_bit + S_SUMMER_BIT
@@ -212,6 +223,7 @@ function help() {
     print " -t  days per harvest"
     print " -w  average (rounded) profit for a crop in a week"
     print " -W  average (rounded) profit for a crop in a week, over a plot"
+    print " -z  specifies a custom plot size (in tiles)"
     print 
     print "Season options:" 
     print " - Typing two hyphens followed by the season name (e.g. `--winter`)"
