@@ -40,5 +40,7 @@ with an unknown growing season.
 
 ## Requirements
 Requires `gawk` and its `getopt()` library function, as well as `bash`.
- * `crops` looks for `getopt()` by default in `/usr/share/awk`; edit the
-   path at the top of `crops.awk` to specify another location.
+ * `crops` looks for `getopt()` according to the `AWKPATH` environment 
+   variable, which is set in the shell wrapper (the `crops` script)
+   according to the detected OS it's being run on (currenly only `linux-gnu`
+   and `darwin`). If you need to change this elsewhere, set it in this file.
