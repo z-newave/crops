@@ -10,7 +10,10 @@
 #  -t  days per harvest
 #  -w  average (rounded down) profit for a crop in a week
 #  -W  average (rounded down) profit for a crop in a week, over a plot
+#
+# Preference options:
 #  -z  specifies a custom plot size (in tiles)
+#  -c  enables cleaner output (for piping into other scripts)
 #
 # Season options:
 #  - Typing two hyphens followed by the season name (e.g. `--winter`)
@@ -55,6 +58,7 @@ BEGIN {
     A_TPH_BIT           = 512
     A_WEEK_BIT          = 1024
     A_WEEK_PLOT_BIT     = 2048
+    CLEAN_OUTPUT_BIT    = 4096
 
     prefs_bit = parse_args()
 
@@ -103,7 +107,7 @@ function parse_args(        prefs_bit, Opterr) {
 
     # Process arguments and bitpack them into prefs_bit
     while ((c = getopt(ARGC, ARGV, 
-            "psPShtwWz:", 
+            "psPShtwWcz:", 
             "summer,autumn,winter,spring,all")) != -1) {
         switch (c) {
             case "p":
@@ -129,6 +133,9 @@ function parse_args(        prefs_bit, Opterr) {
                 break
             case "W":
                 prefs_bit = prefs_bit + A_WEEK_PLOT_BIT
+                break
+            case "c":
+                prefs_bit = prefs_bit + CLEAN_OUTPUT_BIT
                 break
             case "z":
                 if (Optarg == 0) {
@@ -167,36 +174,68 @@ function parse_args(        prefs_bit, Opterr) {
 
 # Calculate and format each statistic for appropriate crops
 function output_values(prefs_bit, cname, basep, sellp, tph, season) {
-    printf "%s - %s\n====\n", cname, season
+    if (!and(prefs_bit, CLEAN_OUTPUT_BIT))
+        printf "%s - %s\n====\n", cname, season
     
     # Go through arguments to see which values to print
-    if (and(prefs_bit, A_PROFIT_BIT))          # p (just profit) 
-        printf "Profit:\t\t£ %6i\n", 
-            profit(sellp, basep)
+    if (and(prefs_bit, A_PROFIT_BIT))          # p (just profit)
+        if(and(prefs_bit, CLEAN_OUTPUT_BIT))
+            printf "%s\tprofit\t\t%i\n",
+                cname, profit(sellp, basep)
+        else
+            printf "Profit:\t\t£ %6i\n", 
+                profit(sellp, basep)
 
     if (and(prefs_bit, A_PROFIT_PLOT_BIT))     # P (profit over entire plot)
-        printf "Plot profit:\t£ %6i\n", 
-            profit(sellp, basep) * PLOT_SIZE
+        if(and(prefs_bit, CLEAN_OUTPUT_BIT))
+            printf "%s\tprofit_p\t%i\n",
+                cname, profit(sellp, basep) * PLOT_SIZE
+        else
+            printf "Plot profit:\t£ %6i\n", 
+                profit(sellp, basep) * PLOT_SIZE
 
     if (and(prefs_bit, A_SEASON_BIT))          # s (profit over season)
-        printf "Season:\t\t£ %6i\n", 
-            profit_season(sellp, basep, tph)
+        if(and(prefs_bit, CLEAN_OUTPUT_BIT))
+            printf "%s\tseason\t\t%i\n",
+                cname, profit_season(sellp, basep, tph)
+        else
+            printf "Season:\t\t£ %6i\n", 
+                profit_season(sellp, basep, tph)
 
     if (and(prefs_bit, A_SEASON_PLOT_BIT))     # S (profit over plot & season)
-        printf "Season - plot:\t£ %6i\n", 
-            profit_season(sellp, basep, tph) * PLOT_SIZE
+        if(and(prefs_bit, CLEAN_OUTPUT_BIT))
+            printf "%s\tseason_p\t%i\n",
+                cname, profit_season(sellp, basep, tph) * PLOT_SIZE
+        else
+            printf "Season plot:\t£ %6i\n", 
+                profit_season(sellp, basep, tph) * PLOT_SIZE
 
     if (and(prefs_bit, A_WEEK_BIT))            # w (mean profit within a week)
-        printf "Week:\t\t£ %6i\n",
-            profit_week(sellp, basep, tph)
+        if(and(prefs_bit, CLEAN_OUTPUT_BIT))
+            printf "%s\tweek\t\t%i\n",
+                cname, profit_week(sellp, basep, tph)
+        else
+            printf "Week:\t\t£ %6i\n",
+                profit_week(sellp, basep, tph)
 
     if (and(prefs_bit, A_WEEK_BIT))            # W (mean profit within a week
-        printf "Week - plot:\t£ %6i\n",        #    over an entire plot)
-            profit_week(sellp, basep, tph) * PLOT_SIZE
+        if(and(prefs_bit, CLEAN_OUTPUT_BIT))   #    over an entire plot)
+            printf "%s\tweek_p\t\t%i\n",
+                cname, profit_week(sellp, basep, tph) * PLOT_SIZE
+        else
+            printf "Week plot:\t£ %6i\n",                       
+                profit_week(sellp, basep, tph) * PLOT_SIZE
  
     if (and(prefs_bit, A_TPH_BIT))             # t (days per harvest)
-        printf "Harvest time:\t%i days\n", tph
+        if(and(prefs_bit, CLEAN_OUTPUT_BIT))
+            printf "%s\tharvest\t\t%i\n",
+                cname, tph
+        else
+            printf "Harvest time:\t%i days\n", tph
 
+    # Print crop's season out on its own line if the `-c` flag is set
+    if (and(prefs_bit, CLEAN_OUTPUT_BIT))
+        printf "%s\tgrowing\t\t%s", cname, season
          
     # Must include two quotations - otherwise will print $0 by default
     print ""
@@ -223,8 +262,11 @@ function help() {
     print " -t  days per harvest"
     print " -w  average (rounded) profit for a crop in a week"
     print " -W  average (rounded) profit for a crop in a week, over a plot"
+    print
+    print "Preference options:"
     print " -z  specifies a custom plot size (in tiles)"
-    print 
+    print " -c  enables cleaner output (for piping into other scripts)"
+    print
     print "Season options:" 
     print " - Typing two hyphens followed by the season name (e.g. `--winter`)"
     print "   specifies that only that season's crops are to be processed."
